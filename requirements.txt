@@ -1,0 +1,33 @@
+# Core application
+dash==4.2.0
+plotly==6.8.0
+pandas==3.0.1
+numpy==2.4.3
+gunicorn==22.0.0  # Linux/deployment only — not required for local Windows dev
+
+# Dash / Flask internals
+Flask==3.0.0
+Werkzeug==3.1.6
+blinker==1.9.0
+click==8.3.1
+itsdangerous==2.2.0
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+retrying==1.4.2
+
+# Plotly internals
+narwhals==2.22.0
+packaging==26.0
+
+# Pandas internals
+python-dateutil==2.9.0.post0
+pytz==2025.2
+tzdata==2025.3
+six==1.17.0
+
+# HTTP / network
+requests==2.31.0
+certifi==2026.2.25
+charset-normalizer==3.4.4
+idna==3.11
+urllib3==2.6.3
