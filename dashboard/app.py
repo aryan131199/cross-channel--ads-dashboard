@@ -290,7 +290,7 @@ def fig_efficiency_scatter():
             x=d["spend"], y=d["conversions"],
             mode="markers+text",
             name=plat,
-            marker=dict(color=color, size=d["ctr"] * 500, opacity=0.75,
+            marker=dict(color=color, size=d["ctr"] * 5, opacity=0.75,
                         line=dict(color=C["border"], width=1)),
             text=d["campaign_name"].str.replace("_", " "),
             textposition="top center",
@@ -368,24 +368,45 @@ def fig_tiktok_engagement():
 
 
 def build_campaign_table():
+    from dash.dash_table.Format import Format, Group, Scheme, Symbol
+    from dash import dash_table as dt
+
     tbl = by_campaign.copy()
-    tbl["Spend"]       = tbl["spend"].apply(lambda x: f"${x:,.0f}")
-    tbl["Impressions"] = tbl["impressions"].apply(lambda x: f"{x:,}")
-    tbl["Clicks"]      = tbl["clicks"].apply(lambda x: f"{x:,}")
-    tbl["Conversions"] = tbl["conversions"].apply(lambda x: f"{x:,}")
-    tbl["CTR"]         = tbl["ctr"].apply(lambda x: f"{x:.2f}%")
-    tbl["CPC"]         = tbl["cpc"].apply(lambda x: f"${x:.2f}")
-    tbl["CPA"]         = tbl["cpa"].apply(lambda x: f"${x:.2f}")
     tbl = tbl.sort_values("conversions", ascending=False)
     tbl["Campaign"] = tbl["campaign_name"].str.replace("_", " ")
     tbl["Platform"] = tbl["platform"]
+    tbl["Spend"]       = tbl["spend"].round(0)
+    tbl["Impressions"] = tbl["impressions"]
+    tbl["Clicks"]      = tbl["clicks"]
+    tbl["Conversions"] = tbl["conversions"]
+    tbl["CTR"]         = tbl["ctr"].round(2)
+    tbl["CPC"]         = tbl["cpc"].round(2)
+    tbl["CPA"]         = tbl["cpa"].round(2)
 
     display = tbl[["Platform","Campaign","Spend","Impressions","Clicks",
                    "Conversions","CTR","CPC","CPA"]]
 
+    money   = Format(scheme=Scheme.fixed, precision=0, symbol=Symbol.yes, symbol_prefix="$",
+                     group=Group.yes)
+    money2  = Format(scheme=Scheme.fixed, precision=2, symbol=Symbol.yes, symbol_prefix="$")
+    num_fmt = Format(scheme=Scheme.fixed, precision=0, group=Group.yes)
+    pct_fmt = Format(scheme=Scheme.fixed, precision=2, symbol=Symbol.yes, symbol_suffix="%")
+
+    columns = [
+        {"name": "Platform",    "id": "Platform",    "type": "text"},
+        {"name": "Campaign",    "id": "Campaign",    "type": "text"},
+        {"name": "Spend",       "id": "Spend",       "type": "numeric", "format": money},
+        {"name": "Impressions", "id": "Impressions", "type": "numeric", "format": num_fmt},
+        {"name": "Clicks",      "id": "Clicks",      "type": "numeric", "format": num_fmt},
+        {"name": "Conversions", "id": "Conversions", "type": "numeric", "format": num_fmt},
+        {"name": "CTR",         "id": "CTR",         "type": "numeric", "format": pct_fmt},
+        {"name": "CPC",         "id": "CPC",         "type": "numeric", "format": money2},
+        {"name": "CPA",         "id": "CPA",         "type": "numeric", "format": money2},
+    ]
+
     return dash_table.DataTable(
         data=display.to_dict("records"),
-        columns=[{"name": c, "id": c} for c in display.columns],
+        columns=columns,
         sort_action="native",
         style_table={"overflowX": "auto", "borderRadius": "8px"},
         style_header={
